@@ -1,0 +1,1 @@
+"""NiceGUI user interface layer."""

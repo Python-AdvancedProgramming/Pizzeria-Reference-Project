@@ -1,0 +1,59 @@
+from pathlib import Path
+
+from pizza_app.data_access.dao import PizzaDAO, OrderDAO
+from pizza_app.services.invoice import InvoiceService
+from pizza_app.services.pricing import PricingService
+from pizza_app.ui.controllers import OrderController
+
+
+def test_checkout_single_pizza_creates_order(database, seeded_db, tmp_path):
+    controller = OrderController(
+        pizza_dao=PizzaDAO(database.engine),
+        order_dao=OrderDAO(database.engine),
+        pricing=PricingService(),
+        invoice=InvoiceService(invoice_dir=str(tmp_path)),
+    )
+
+    controller.set_quantity(1, 1)
+    order, invoice_path = controller.checkout()
+
+    assert order is not None
+    assert order.id is not None
+    assert order.total_chf > 0
+    assert Path(invoice_path).exists()
+
+
+def test_checkout_multiple_pizzas_applies_discount(database, seeded_db, tmp_path):
+    controller = OrderController(
+        pizza_dao=PizzaDAO(database.engine),
+        order_dao=OrderDAO(database.engine),
+        pricing=PricingService(),
+        invoice=InvoiceService(invoice_dir=str(tmp_path)),
+    )
+
+    controller.set_quantity(1, 3)  # 3 x 10 = 30
+    controller.set_quantity(2, 2)  # 2 x 15 = 30
+    order, invoice_path = controller.checkout()
+
+    assert order.subtotal_chf == 60.0
+    assert order.discount_chf == 6.0
+    assert order.total_chf == 54.0
+    assert Path(invoice_path).exists()
+
+
+def test_checkout_exactly_50_does_not_apply_discount(database, seeded_db, tmp_path):
+    controller = OrderController(
+        pizza_dao=PizzaDAO(database.engine),
+        order_dao=OrderDAO(database.engine),
+        pricing=PricingService(),
+        invoice=InvoiceService(invoice_dir=str(tmp_path)),
+    )
+
+    controller.set_quantity(1, 2)  # 2 x 10 = 20
+    controller.set_quantity(2, 2)  # 2 x 15 = 30
+    order, invoice_path = controller.checkout()
+
+    assert order.subtotal_chf == 50.0
+    assert order.discount_chf == 0.0
+    assert order.total_chf == 50.0
+    assert Path(invoice_path).exists()

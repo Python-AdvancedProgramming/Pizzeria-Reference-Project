@@ -1,0 +1,25 @@
+{
+  "name": "Example-Playground",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true,
+        "workbench.startupEditor": "readme",
+        "remote.autoForwardPorts": false,
+        "editor.inlineSuggest.enabled": true
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter"
+      ]
+    }
+  },
+  "remoteUser": "vscode",
+  "forwardPorts": []
+}

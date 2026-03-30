@@ -1,0 +1,14 @@
+[project]
+name = "pizza-app"
+version = "0.1.0"
+description = "NiceGUI pizza ordering app using OOP, ORM, and an MVC-inspired structure."
+requires-python = ">=3.10"
+
+dependencies = [
+    "nicegui",
+    "sqlmodel",
+    "reportlab",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
