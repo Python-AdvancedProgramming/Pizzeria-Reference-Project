@@ -6,12 +6,12 @@ DAOs encapsulate CRUD operations and queries behind class-based interfaces.
 
 from __future__ import annotations
 
-from typing import List, Optional, Sequence
+from typing import List, Optional
 
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, select
 
-from ..domain.models import Order, OrderItem, Pizza
+from ..domain.models import Order, Pizza
 
 
 class BaseDAO:
@@ -42,16 +42,10 @@ class PizzaDAO(BaseDAO):
 class OrderDAO(BaseDAO):
     """DAO for order header and order item persistence."""
 
-    def create(self, order: Order, items: Sequence[OrderItem]) -> Order:
-        """Persist an Order plus its OrderItems and return the stored order."""
+    def create(self, order: Order) -> Order:
+        """Persist an Order and return the stored order."""
         with self.session() as session:
             session.add(order)
-            session.commit()
-            session.refresh(order)
-
-            for item in items:
-                item.order_id = order.id  # type: ignore[arg-type]
-                session.add(item)
             session.commit()
             session.refresh(order)
             return order
@@ -63,7 +57,7 @@ class OrderDAO(BaseDAO):
             return list(session.exec(statement).all())
 
     def get_with_items(self, order_id: int) -> Optional[Order]:
-        """Load an order together with its items and linked pizzas."""
+        """Load an order together with its items and pizzas."""
         with self.session() as session:
             order = session.get(Order, order_id)
             if not order:
@@ -72,10 +66,3 @@ class OrderDAO(BaseDAO):
             for item in order.items:
                 _ = item.pizza
             return order
-
-
-# Backward-compatible aliases while the rest of the app moves from Repository naming
-# to DAO naming. This keeps tests and imports stable for users who still import the
-# previous class names.
-PizzaRepository = PizzaDAO
-OrderRepository = OrderDAO

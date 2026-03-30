@@ -11,8 +11,10 @@ from nicegui import ui
 
 from .data_access.db import Database
 from .data_access.dao import OrderDAO, PizzaDAO
-from .services.pricing import PricingService
-from .services.invoice import InvoiceService
+from .services.pricing_service import PricingService
+from .services.invoice_service import InvoiceService
+from .services.pizza_service import PizzaService
+from .services.order_service import OrderService
 from .ui.controllers import AdminController, OrderController
 from .ui.pages import Pages
 
@@ -29,16 +31,18 @@ class PizzaApplication:
 
         self.pizza_dao = PizzaDAO(engine)
         self.order_dao = OrderDAO(engine)
+        self.pizza_service = PizzaService(pizza_dao=self.pizza_dao)
+        self.order_service = OrderService(order_dao=self.order_dao)
         self.pricing = PricingService()
         self.invoice = InvoiceService(invoice_dir=self.invoice_dir)
 
         self.order_controller = OrderController(
-            pizza_dao=self.pizza_dao,
-            order_dao=self.order_dao,
+            pizza_service=self.pizza_service,
+            order_service=self.order_service,
             pricing=self.pricing,
             invoice=self.invoice,
         )
-        self.admin_controller = AdminController(order_dao=self.order_dao)
+        self.admin_controller = AdminController(order_service=self.order_service)
         self.pages = Pages(order_controller=self.order_controller, admin_controller=self.admin_controller)
 
     def run(self, host: str = "0.0.0.0", port: int = 8080, reload: bool = False) -> None:

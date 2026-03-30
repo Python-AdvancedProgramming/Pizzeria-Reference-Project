@@ -9,20 +9,21 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 from ..domain.models import Order, OrderItem, Pizza
-from ..data_access.dao import OrderDAO, PizzaDAO
-from ..services.invoice import InvoiceService
-from ..services.pricing import PricingService
+from ..services.pizza_service import PizzaService
+from ..services.order_service import OrderService
+from ..services.invoice_service import InvoiceService
+from ..services.pricing_service import PricingService
 
 
 class AdminController:
     """Controller for admin queries."""
 
-    def __init__(self, order_dao: OrderDAO) -> None:
-        self.order_dao = order_dao
+    def __init__(self, order_service: OrderService) -> None:
+        self.order_service = order_service
 
     def list_transactions(self, limit: int = 200) -> List[Order]:
         """List most recent orders."""
-        return self.order_dao.list_recent(limit=limit)
+        return self.order_service.list_recent(limit=limit)
 
 
 @dataclass
@@ -46,26 +47,26 @@ class OrderController:
 
     def __init__(
         self,
-        pizza_dao: PizzaDAO,
-        order_dao: OrderDAO,
+        pizza_service: PizzaService,
+        order_service: OrderService,
         pricing: PricingService,
         invoice: InvoiceService,
     ) -> None:
-        self.pizza_dao = pizza_dao
-        self.order_dao = order_dao
+        self.pizza_service = pizza_service
+        self.order_service = order_service
         self.pricing = pricing
         self.invoice = invoice
         self._cart: Dict[int, int] = {}
 
     def menu(self) -> List[Pizza]:
         """Return the pizza menu."""
-        return self.pizza_dao.list_menu()
+        return self.pizza_service.list_menu()
 
     def cart_lines(self) -> List[CartLine]:
         """Return current cart as a list of cart lines."""
         lines: List[CartLine] = []
         for pid, qty in sorted(self._cart.items()):
-            pizza = self.pizza_dao.get_by_id(pid)
+            pizza = self.pizza_service.get_by_id(pid)
             if pizza is None:
                 continue
             lines.append(CartLine(pizza=pizza, quantity=qty))
@@ -83,7 +84,7 @@ class OrderController:
             self._cart.pop(pizza_id, None)
             return
 
-        if self.pizza_dao.get_by_id(pizza_id) is None:
+        if self.pizza_service.get_by_id(pizza_id) is None:
             raise ValueError(f"Unknown pizza id: {pizza_id}")
         self._cart[pizza_id] = quantity
 
@@ -109,26 +110,22 @@ class OrderController:
     def checkout(self) -> Tuple[Order, str]:
         """Persist the current cart as an order and generate an invoice."""
         lines = self.cart_lines()
+
         if not lines:
             raise ValueError("Cart is empty.")
-
+        
         subtotal, discount, total = self.totals()
         order = Order(subtotal_chf=subtotal, discount_chf=discount, total_chf=total)
-
-        items: List[OrderItem] = []
         for line in lines:
-            items.append(
-                OrderItem(
-                    order_id=0,
-                    pizza_id=line.pizza.id or 0,
-                    quantity=line.quantity,
-                    unit_price_chf=line.unit_price_chf,
-                    line_total_chf=line.line_total_chf,
-                )
+            item = OrderItem(
+                pizza_id=line.pizza.id,  # type: ignore[union-attr]
+                quantity=line.quantity,
+                unit_price_chf=line.unit_price_chf,
+                line_total_chf=line.line_total_chf,
             )
-
-        order = self.order_dao.create(order, items)
-        order_full = self.order_dao.get_with_items(order.id)  # type: ignore[arg-type]
+            order.items.append(item)
+        order = self.order_service.create(order)
+        order_full = self.order_service.get_with_items(order.id)  # type: ignore[arg-type]
         if order_full is None:
             order_full = order
 

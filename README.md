@@ -225,8 +225,11 @@ pizza_app/
 │   └── models.py
 ├── services/
 │   ├── __init__.py
-│   ├── invoice.py
-│   └── pricing.py
+│   ├── invoice_service.py
+│   ├── order_service.py
+│   ├── pizza_service.py
+│   └── pricing_service.py
+
 └── ui/
     ├── __init__.py
     ├── controllers.py

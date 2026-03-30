@@ -1,4 +1,4 @@
-from pizza_app.services.pricing import PricingService
+from pizza_app.services.pricing_service import PricingService
 
 
 def test_subtotal_calculation(sample_items):
