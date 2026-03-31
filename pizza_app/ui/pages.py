@@ -16,12 +16,12 @@ from .controllers import AdminController, ShoppingController
 class Pages:
     """Registers all NiceGUI routes (UI boundary)."""
 
-    def __init__(self, order_controller: ShoppingController, admin_controller: AdminController) -> None:
-        self._order_controller = order_controller
+    def __init__(self, shopping_controller: ShoppingController, admin_controller: AdminController) -> None:
+        self._shopping_controller = shopping_controller
         self._admin_controller = admin_controller
 
     def register(self) -> None:
-        order_controller = self._order_controller
+        order_controller = self._shopping_controller
         admin_controller = self._admin_controller
 
         @ui.page("/")

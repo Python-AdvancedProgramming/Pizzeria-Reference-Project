@@ -45,7 +45,7 @@ class PizzaApplication:
             invoice_service=self.invoice,
         )
         self.admin_controller = AdminController(order_service=self.order_service)
-        self.pages = Pages(order_controller=self.order_controller, admin_controller=self.admin_controller)
+        self.pages = Pages(shopping_controller=self.order_controller, admin_controller=self.admin_controller)
 
     def run(self, host: str = "0.0.0.0", port: int = 8080, reload: bool = False) -> None:
         """Run the NiceGUI application."""
