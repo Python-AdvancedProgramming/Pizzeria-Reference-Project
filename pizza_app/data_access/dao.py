@@ -43,13 +43,13 @@ class OrderDAO(BaseDAO):
     """DAO for order header and order item persistence."""
 
     def create(self, order: Order) -> Order:
-        """Persist an Order and return the stored order."""
+        """Persist an Order and return the stored order, with items and pizzas eagerly loaded."""
         with self.session() as session:
             session.add(order)
             session.commit()
             session.refresh(order)
-            return order
-
+        return order
+    
     def list_recent(self, limit: int = 200) -> List[Order]:
         """Return orders newest-first."""
         with self.session() as session:

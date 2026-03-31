@@ -5,14 +5,21 @@ from pizza_app.services.invoice_service import InvoiceService
 from pizza_app.services.order_service import OrderService
 from pizza_app.services.pizza_service import PizzaService
 from pizza_app.services.pricing_service import PricingService
-from pizza_app.ui.controllers import OrderController
+from pizza_app.ui.controllers import ShoppingController
 
 def test_checkout_single_pizza_creates_order(database, seeded_db, tmp_path):
-    controller = OrderController(
+    pricing_service = PricingService()
+    invoice_service = InvoiceService(invoice_dir=str(tmp_path))
+
+    controller = ShoppingController(
         pizza_service=PizzaService(pizza_dao=PizzaDAO(database.engine)),
-        order_service=OrderService(order_dao=OrderDAO(database.engine)),
-        pricing=PricingService(),
-        invoice=InvoiceService(invoice_dir=str(tmp_path)),
+        order_service=OrderService(
+            order_dao=OrderDAO(database.engine), 
+            invoice_service=invoice_service, 
+            pricing_service=pricing_service
+        ),
+        pricing_service=pricing_service,
+        invoice_service=invoice_service,
     )
 
     controller.set_quantity(1, 1)
@@ -25,11 +32,17 @@ def test_checkout_single_pizza_creates_order(database, seeded_db, tmp_path):
 
 
 def test_checkout_multiple_pizzas_applies_discount(database, seeded_db, tmp_path):
-    controller = OrderController(
+    pricing_service = PricingService()
+    invoice_service = InvoiceService(invoice_dir=str(tmp_path))
+    controller = ShoppingController(
         pizza_service=PizzaService(pizza_dao=PizzaDAO(database.engine)),
-        order_service=OrderService(order_dao=OrderDAO(database.engine)),
-        pricing=PricingService(),
-        invoice=InvoiceService(invoice_dir=str(tmp_path)),
+        order_service=OrderService(
+            order_dao=OrderDAO(database.engine),
+            invoice_service=invoice_service, 
+            pricing_service=pricing_service
+        ),
+        pricing_service=pricing_service,
+        invoice_service=invoice_service,
     )
 
     controller.set_quantity(1, 3)  # 3 x 10 = 30
@@ -43,11 +56,17 @@ def test_checkout_multiple_pizzas_applies_discount(database, seeded_db, tmp_path
 
 
 def test_checkout_exactly_50_does_not_apply_discount(database, seeded_db, tmp_path):
-    controller = OrderController(
+    pricing_service = PricingService()
+    invoice_service = InvoiceService(invoice_dir=str(tmp_path))
+    controller = ShoppingController(
         pizza_service=PizzaService(pizza_dao=PizzaDAO(database.engine)),
-        order_service=OrderService(order_dao=OrderDAO(database.engine)),
-        pricing=PricingService(),
-        invoice=InvoiceService(invoice_dir=str(tmp_path)),
+        order_service=OrderService(
+            order_dao=OrderDAO(database.engine), 
+            invoice_service=invoice_service, 
+            pricing_service=pricing_service
+        ),
+        pricing_service=pricing_service,
+        invoice_service=invoice_service,
     )
 
     controller.set_quantity(1, 2)  # 2 x 10 = 20

@@ -15,7 +15,7 @@ from .services.pricing_service import PricingService
 from .services.invoice_service import InvoiceService
 from .services.pizza_service import PizzaService
 from .services.order_service import OrderService
-from .ui.controllers import AdminController, OrderController
+from .ui.controllers import AdminController, ShoppingController
 from .ui.pages import Pages
 
 
@@ -31,16 +31,18 @@ class PizzaApplication:
 
         self.pizza_dao = PizzaDAO(engine)
         self.order_dao = OrderDAO(engine)
-        self.pizza_service = PizzaService(pizza_dao=self.pizza_dao)
-        self.order_service = OrderService(order_dao=self.order_dao)
-        self.pricing = PricingService()
         self.invoice = InvoiceService(invoice_dir=self.invoice_dir)
+        self.pizza_service = PizzaService(pizza_dao=self.pizza_dao)
+        self.pricing = PricingService()
+        self.order_service = OrderService(order_dao=self.order_dao, invoice_service=self.invoice, pricing_service=self.pricing)
+        
+        
 
-        self.order_controller = OrderController(
+        self.order_controller = ShoppingController(
             pizza_service=self.pizza_service,
             order_service=self.order_service,
-            pricing=self.pricing,
-            invoice=self.invoice,
+            pricing_service=self.pricing,
+            invoice_service=self.invoice,
         )
         self.admin_controller = AdminController(order_service=self.order_service)
         self.pages = Pages(order_controller=self.order_controller, admin_controller=self.admin_controller)

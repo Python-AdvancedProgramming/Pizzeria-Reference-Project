@@ -10,13 +10,13 @@ from zoneinfo import ZoneInfo
 
 from nicegui import ui
 
-from .controllers import AdminController, OrderController
+from .controllers import AdminController, ShoppingController
 
 
 class Pages:
     """Registers all NiceGUI routes (UI boundary)."""
 
-    def __init__(self, order_controller: OrderController, admin_controller: AdminController) -> None:
+    def __init__(self, order_controller: ShoppingController, admin_controller: AdminController) -> None:
         self._order_controller = order_controller
         self._admin_controller = admin_controller
 

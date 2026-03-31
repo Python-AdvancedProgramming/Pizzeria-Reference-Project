@@ -42,20 +42,20 @@ class CartLine:
         return round(self.unit_price_chf * self.quantity, 2)
 
 
-class OrderController:
+class ShoppingController:
     """Controller for the customer/staff flow: menu -> cart -> checkout."""
 
     def __init__(
         self,
         pizza_service: PizzaService,
         order_service: OrderService,
-        pricing: PricingService,
-        invoice: InvoiceService,
+        pricing_service: PricingService,
+        invoice_service: InvoiceService,
     ) -> None:
         self.pizza_service = pizza_service
         self.order_service = order_service
-        self.pricing = pricing
-        self.invoice = invoice
+        self.pricing_service = pricing_service
+        self.invoice_service = invoice_service
         self._cart: Dict[int, int] = {}
 
     def menu(self) -> List[Pizza]:
@@ -105,7 +105,7 @@ class OrderController:
     def totals(self) -> Tuple[float, float, float]:
         """Return (subtotal, discount, total) for the current cart."""
         line_totals = [line.line_total_chf for line in self.cart_lines()]
-        return self.pricing.totals_from_lines(line_totals)
+        return self.pricing_service.totals_from_lines(line_totals)
 
     def checkout(self) -> Tuple[Order, str]:
         """Persist the current cart as an order and generate an invoice."""
@@ -114,21 +114,7 @@ class OrderController:
         if not lines:
             raise ValueError("Cart is empty.")
         
-        subtotal, discount, total = self.totals()
-        order = Order(subtotal_chf=subtotal, discount_chf=discount, total_chf=total)
-        for line in lines:
-            item = OrderItem(
-                pizza_id=line.pizza.id,  # type: ignore[union-attr]
-                quantity=line.quantity,
-                unit_price_chf=line.unit_price_chf,
-                line_total_chf=line.line_total_chf,
-            )
-            order.items.append(item)
-        order = self.order_service.create(order)
-        order_full = self.order_service.get_with_items(order.id)  # type: ignore[arg-type]
-        if order_full is None:
-            order_full = order
+        order, pdf_path = self.order_service.checkout(items=[(line.pizza, line.quantity) for line in lines])
 
-        pdf_path = self.invoice.generate_pdf(order_full)
         self.clear_cart()
-        return order_full, str(pdf_path)
+        return order, str(pdf_path)
