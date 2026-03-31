@@ -1,6 +1,6 @@
 """Package entrypoint.
 
-Run with (from \pizza-app\pizza-app):
+Run with (from project root):
     py -m pizza_app
 """
 
