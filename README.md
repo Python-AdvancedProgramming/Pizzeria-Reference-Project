@@ -116,11 +116,11 @@ The application allows users to:
 - Clear separation of concerns
 - Business logic independent of UI
 
-### Patterns Used
-- MVC  
-- Repository / DAO  
-- Strategy (pricing rules)  
-- Adapter (invoice generation)  
+### Design Patterns Used
+- Model-View-Controller / Layered MVC Variant: MVC makes sense here because the application has a graphical user interface, user interactions, business objects, and database access. Separating these responsibilities makes the project easier to understand, test, and extend.  
+- Facade Pattern:  Facade makes sense because database setup involves several technical details. The rest of the application should not need to know how the database engine, tables, initial data, and sessions are created. 
+- Strategy (pricing rules):  Strategy makes sense for pricing because rules can change (e.g., discounts), and separating them into interchangeable strategies allows switching algorithms without modifying controllers or order logic. 
+- Adapter (invoice generation): Adapter makes sense because ReportLab has its own API, which is not designed specifically for this pizzeria application. By wrapping it in InvoiceService, the rest of the project can work with a simple invoice-generation interface.  
 
 ---
 
