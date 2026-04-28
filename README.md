@@ -119,7 +119,8 @@ The application allows users to:
 ### Design Patterns Used
 - Model-View-Controller / Layered MVC Variant: MVC makes sense here because the application has a graphical user interface, user interactions, business objects, and database access. Separating these responsibilities makes the project easier to understand, test, and extend.  
 - Facade Pattern:  Facade makes sense because database setup involves several technical details. The rest of the application should not need to know how the database engine, tables, initial data, and sessions are created. 
-- Strategy (pricing rules):  Strategy makes sense for pricing because rules can change (e.g., discounts), and separating them into interchangeable strategies allows switching algorithms without modifying controllers or order logic. 
+- Strategy: PricingService partially(!) follows the idea of the Strategy pattern. 
+It encapsulates the pricing and discount calculation: subtotal calculation, discount calculation, total calculation. 
 - Adapter (invoice generation): Adapter makes sense because ReportLab has its own API, which is not designed specifically for this pizzeria application. By wrapping it in InvoiceService, the rest of the project can work with a simple invoice-generation interface.  
 
 ---
@@ -318,17 +319,6 @@ Order Pizza:
 | Student A | NiceGUI UI + documentation |
 | Student B | Database & ORM + documentation |
 | Student C | Business logic + documentation |
-
----
-
-## 🤝 Contributing
-
-> 🚧 This is a template repository for student projects.  
-> 🚧 Do not change this section in your final submission.
-
-- Use this repository as a starting point by importing it into your own GitHub account  
-- Work only within your own copy — do not push to the original template  
-- Commit regularly to track your progress  
 
 ---
 
